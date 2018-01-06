@@ -101,9 +101,14 @@ class KITTIData(Data):
        dirs = []
        dates = os.listdir(top_dir)
        for date in dates:
+           if '2011' not in date:
+                continue
            date_path = os.path.join(top_dir, date)
+           #for dt in date_path:
            extracts = os.listdir(date_path)
            for extract in extracts:
+               if 'sync' not in extract:
+                   continue
                extract_path = os.path.join(date_path, extract)
                image_02_folder = os.path.join(extract_path, 'image_02/data')
                image_03_folder = os.path.join(extract_path, 'image_03/data')
@@ -124,7 +129,7 @@ class KITTIData(Data):
         base_url = self.KITTI_RAW_URL
         local_dir = os.path.join(self.data_dir, 'kitti_raw')
         records = raw_records.get_kitti_records(self.development)
-        downloaded_records = False
+        downloaded_records = True
           
         for i, record in enumerate(records):
             date_str = record.split("_drive_")[0]

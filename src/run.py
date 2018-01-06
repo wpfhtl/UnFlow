@@ -4,18 +4,18 @@ import copy
 import tensorflow as tf
 from tensorflow.python.client import device_lib
 
-from e2eflow.core.train import Trainer
-from e2eflow.experiment import Experiment
-from e2eflow.util import convert_input_strings
+from src.e2eflow.core.train import Trainer
+from src.e2eflow.experiment import Experiment
+from src.e2eflow.util import convert_input_strings
 
-from e2eflow.kitti.input import KITTIInput
-from e2eflow.kitti.data import KITTIData
-from e2eflow.chairs.data import ChairsData
-from e2eflow.chairs.input import ChairsInput
-from e2eflow.sintel.data import SintelData
-from e2eflow.sintel.input import SintelInput
-from e2eflow.synthia.data import SynthiaData
-from e2eflow.cityscapes.data import CityscapesData
+from src.e2eflow.kitti.input import KITTIInput
+from src.e2eflow.kitti.data import KITTIData
+from src.e2eflow.chairs.data import ChairsData
+from src.e2eflow.chairs.input import ChairsInput
+from src.e2eflow.sintel.data import SintelData
+from src.e2eflow.sintel.input import SintelInput
+from src.e2eflow.synthia.data import SynthiaData
+from src.e2eflow.cityscapes.data import CityscapesData
 
 
 tf.app.flags.DEFINE_string('ex', 'default',
