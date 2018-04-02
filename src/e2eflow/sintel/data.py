@@ -9,7 +9,7 @@ from ..util import tryremove
 
 
 class SintelData(Data):
-    SINTEL_URL = 'http://files.is.tue.mpg.de/sintel/MPI-Sintel-complete.zip'
+    # SINTEL_URL = 'http://files.is.tue.mpg.de/sintel/MPI-Sintel-complete.zip'
 
     dirs = ['sintel']
 
@@ -27,7 +27,8 @@ class SintelData(Data):
     def get_raw_dirs(self):
         dirs = []
         for folder in ['training/clean', 'training/final', 'test/clean', 'test/final']:
-            top_dir = os.path.join(self.current_dir, 'sintel/' + folder)
+            # top_dir = os.path.join(self.current_dir, 'sintel/' + folder)
+            top_dir = os.path.join(self.current_dir, 'data_mpi/' + folder)
             for sub_dir in os.listdir(top_dir):
               dirs.append(os.path.join(top_dir, sub_dir))
         return dirs

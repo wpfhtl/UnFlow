@@ -155,11 +155,11 @@ def _flownet_upconv(conv6_1, conv5_1, conv4_1, conv3_1, conv2, conv1=None, input
     return flows
 
 
-def nhwc_to_nchw(tensors):
+def nhwc_to_nchw(tensors):   # [number, height, width, color] convert to [number, color, height, width]
     return [tf.transpose(t, [0, 3, 1, 2]) for t in tensors]
 
 
-def nchw_to_nhwc(tensors):
+def nchw_to_nhwc(tensors):   # [number, color, height, width] convert to [number, height, width, color]
     return [tf.transpose(t, [0, 2, 3, 1]) for t in tensors]
 
 

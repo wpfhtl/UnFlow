@@ -56,8 +56,8 @@ def unsupervised_loss(batch, params, normalization=None, augment=True,
             brightness_stddev=0.02, min_colour=0.9, max_colour=1.1,
             min_gamma=0.7, max_gamma=1.5)
 
-        _track_image(im1_photo, 'augmented1')
-        _track_image(im2_photo, 'augmented2')
+        # _track_image(im1_photo, 'augmented1')
+        # _track_image(im2_photo, 'augmented2')
     else:
         im1_geo, im2_geo = im1, im2
         im1_photo, im2_photo = im1, im2

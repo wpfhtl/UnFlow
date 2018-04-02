@@ -1,4 +1,6 @@
 import os
+import gc
+import objgraph
 import re
 import numpy as np
 from multiprocessing import Process
@@ -39,6 +41,7 @@ def restore_networks(sess, params, ckpt, ckpt_path=None):
     saver = tf.train.Saver(variables_to_save, max_to_keep=1000)
 
     sess.run(tf.global_variables_initializer())
+    # sess.run(tf.local_variables_initializer())
 
     if ckpt is not None:
         # continue training
@@ -136,6 +139,8 @@ class Trainer():
 
         print('-- training from i = {} to {}'.format(start_iter, max_iter))
 
+        gc.collect()
+
         assert (max_iter - start_iter + 1) % save_interval == 0
         for i in range(start_iter, max_iter + 1, save_interval):
             self.train(i, i + save_interval - 1, i - (min_iter + 1))
@@ -187,7 +192,7 @@ class Trainer():
     def train(self, start_iter, max_iter, iter_offset):
         ckpt = tf.train.get_checkpoint_state(self.ckpt_dir)
 
-        with tf.Graph().as_default(), tf.device(self.shared_device):
+        with tf.Graph().as_default(), tf.device(self.shared_device) as graph:
             batch = self.train_batch_fn(iter_offset)
 
             with tf.name_scope('params') as scope:
@@ -203,7 +208,11 @@ class Trainer():
 
             sess_config = tf.ConfigProto(allow_soft_placement=True)
 
+            # print('train_start =============================== train_start')
+            # objgraph.show_growth()
+
             with tf.Session(config=sess_config) as sess:
+
                 if self.debug:
                     summary_writer = tf.summary.FileWriter(self.train_summaries_dir,
                                                             sess.graph)
@@ -215,9 +224,13 @@ class Trainer():
                     run_metadata = None
 
                 saver = restore_networks(sess, self.params, ckpt)
+                tf.get_default_graph().finalize()
 
                 coord = tf.train.Coordinator()
                 threads = tf.train.start_queue_runners(sess=sess, coord=coord)
+
+                # print('train_sess ================================= train_sess')
+                # objgraph.show_growth()
 
                 for local_i, i in enumerate(range(start_iter, max_iter + 1)):
                     #if INTERACTIVE_PLOT:
@@ -250,22 +263,42 @@ class Trainer():
                         options=run_options,
                         run_metadata=run_metadata)
 
+                    # print(local_i, '======', local_i, '======', local_i, '======', local_i)
+                    # objgraph.show_growth()
+
+
                     if i == 1 or i % self.params['display_interval'] == 0:
                         summary = sess.run(summary_, feed_dict=feed_dict)
                         summary_writer.add_summary(summary, i)
                         print("-- train: i = {}, loss = {}".format(i, loss))
 
+                        # print(i, '======', i, '======', i, '======', i)
+                        # objgraph.show_growth()
+                    del feed_dict
+                    # gc.collect()
+
                 save_path =  os.path.join(self.ckpt_dir, 'model.ckpt')
                 saver.save(sess, save_path, global_step=max_iter)
+                del saver
+                # gc.collect()
+                # print('saver ================================= saver')
+                # objgraph.show_growth()
 
                 summary_writer.close()
                 coord.request_stop()
                 coord.join(threads)
+            del train_op, loss_, batch, summaries, summary_, global_step_, sess_config
+            # gc.collect()
+        # gc.collect()
 
     def eval(self, num):
         assert num == 1 # TODO enable num > 1
 
         with tf.Graph().as_default():
+
+            # print('eval_start ======================= eval_start')
+            # objgraph.show_growth()
+
             inputs = self.eval_batch_fn()
             im1, im2, input_shape = inputs[:3]
             truths = inputs[3:]
@@ -285,7 +318,7 @@ class Trainer():
             flow = resize_output_flow(flow, height, width, 2)
             flow_bw = resize_output_flow(flow_bw, height, width, 2)
 
-            variables_to_restore = tf.all_variables()
+            variables_to_restore = tf.global_variables() # tf.all_variables()
 
             images_ = [image_warp(im1, flow) / 255,
                        flow_to_color(flow),
@@ -319,6 +352,8 @@ class Trainer():
                                                       key='eval_avg')
                 values_.extend([error_, outliers_])
                 averages_.extend([error_avg_, outliers_avg])
+            del truth_tuples
+            gc.collect()
 
             losses = tf.get_collection('losses')
             for l in losses:
@@ -335,6 +370,7 @@ class Trainer():
             ckpt_path = ckpt.model_checkpoint_path
 
             with tf.Session() as sess:
+
                 summary_writer = tf.summary.FileWriter(self.eval_summaries_dir)
                 saver = tf.train.Saver(variables_to_restore)
 
@@ -384,6 +420,14 @@ class Trainer():
                                                                       global_step)))
                     self.plot_proc.start()
 
+                # print('eval_sess ========================= eval_sess')
+                # objgraph.show_growth()
+                # del feed
+                # gc.collect()
+            # print('eval_graph ======================= eval_graph')
+            # objgraph.show_growth()
+        # print('eval_end =========================== eval_end')
+        # objgraph.show_growth()
 
 def average_gradients(tower_grads):
     """Calculate the average gradient for each shared variable across all towers.

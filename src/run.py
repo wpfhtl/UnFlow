@@ -16,13 +16,14 @@ from src.e2eflow.sintel.data import SintelData
 from src.e2eflow.sintel.input import SintelInput
 from src.e2eflow.synthia.data import SynthiaData
 from src.e2eflow.cityscapes.data import CityscapesData
-
+from src.e2eflow.driving.data import DrivingData
+from src.e2eflow.driving.input import DrivingInput
 
 tf.app.flags.DEFINE_string('ex', 'default',
                            'Name of the experiment.'
                            'If the experiment folder already exists in the log dir, '
                            'training will be continued from the latest checkpoint.')
-tf.app.flags.DEFINE_boolean('debug', False,
+tf.app.flags.DEFINE_boolean('debug', True,
                             'Enable image summaries and disable checkpoint writing for debugging.')
 tf.app.flags.DEFINE_boolean('ow', False,
                             'Overwrites a previous experiment with the same name (if present)'
@@ -195,6 +196,183 @@ def main(argv=None):
               interactive_plot=run_config.get('interactive_plot'),
               devices=devices)
         tr.run(0, ftiters)
+
+    ## Add
+
+    elif train_dataset == 'driving':
+
+        dconfig = copy.deepcopy(experiment.config['train'])
+
+        dconfig.update(experiment.config['train_driving'])
+
+        convert_input_strings(dconfig, dirs)
+
+        diters = dconfig.get('num_iters', 0)
+
+        ddata = DrivingData(data_dir=dirs['data'],
+
+                            fast_dir=dirs.get('fast'),
+
+                            stat_log_dir=None,
+
+                            development=run_config['development'])
+
+        dinput = DrivingInput(data=ddata,
+
+                              batch_size=gpu_batch_size,
+
+                              normalize=False,
+
+                              dims=(dconfig['height'], dconfig['width']))
+
+        tr = Trainer(
+
+            lambda shift: dinput.input_raw(swap_images=False,
+
+                                           shift=shift * run_config['batch_size']),
+
+            lambda: einput.input_train_2012(),
+
+            params=dconfig,
+
+            normalization=dinput.get_normalization(),
+
+            train_summaries_dir=experiment.train_dir,
+
+            eval_summaries_dir=experiment.eval_dir,
+
+            experiment=FLAGS.ex,
+
+            ckpt_dir=experiment.save_dir,
+
+            debug=FLAGS.debug,
+
+            interactive_plot=run_config.get('interactive_plot'),
+
+            devices=devices)
+
+        tr.run(0, diters)
+
+    ## Add
+    elif train_dataset == 'sintel':
+
+        stconfig = copy.deepcopy(experiment.config['train'])
+
+        stconfig.update(experiment.config['train_sintel'])
+
+        convert_input_strings(stconfig, dirs)
+
+        stiters = stconfig.get('num_iters', 0)
+
+        stdata = SintelData(data_dir=dirs['data'],
+
+                            fast_dir=dirs.get('fast'),
+
+                            stat_log_dir=None,
+
+                            development=run_config['development'])
+
+        stinput = SintelInput(data=stdata,
+
+                              batch_size=gpu_batch_size,
+
+                              normalize=False,
+
+                              dims=(stconfig['height'], stconfig['width']))
+
+        tr = Trainer(
+
+            lambda shift: stinput.input_raw(swap_images=False,
+
+                                           shift=shift * run_config['batch_size']),
+
+            lambda: einput.input_train_2012(),
+
+            params=stconfig,
+
+            normalization=stinput.get_normalization(),
+
+            train_summaries_dir=experiment.train_dir,
+
+            eval_summaries_dir=experiment.eval_dir,
+
+            experiment=FLAGS.ex,
+
+            ckpt_dir=experiment.save_dir,
+
+            debug=FLAGS.debug,
+
+            interactive_plot=run_config.get('interactive_plot'),
+
+            devices=devices)
+
+        tr.run(0, stiters)
+
+    ### Add
+
+    elif train_dataset == 'driving_ft':
+
+        dftconfig = copy.deepcopy(experiment.config['train'])
+
+        dftconfig.update(experiment.config['train_driving_ft'])
+
+        convert_input_strings(dftconfig, dirs)
+
+        dftiters = dftconfig.get('num_iters', 0)
+
+        dftdata = DrivingData(data_dir=dirs['data'],
+
+                              fast_dir=dirs.get('fast'),
+
+                              stat_log_dir=None,
+
+                              development=run_config['development'])
+
+        dftinput = DrivingInput(data=dftdata,
+
+                                batch_size=gpu_batch_size,
+
+                                normalize=False,
+
+                                dims=(dftconfig['height'], dftconfig['width']))
+
+        # Add deinput
+
+        deinput = DrivingInput(data=dftdata,
+
+                               batch_size=1,
+
+                               normalize=False,
+
+                               dims=(960, 540))  # The image size in driving dataset:960pixels*540pixels
+
+        tr = Trainer(
+
+            lambda shift: dftinput.input_train_ft(),
+
+            lambda: deinput.input_test_ft(),
+
+            supervised=True,
+
+            params=dftconfig,
+
+            normalization=dftinput.get_normalization(),
+
+            train_summaries_dir=experiment.train_dir,
+
+            eval_summaries_dir=experiment.eval_dir,
+
+            experiment=FLAGS.ex,
+
+            ckpt_dir=experiment.save_dir,
+
+            debug=FLAGS.debug,
+
+            interactive_plot=run_config.get('interactive_plot'),
+
+            devices=devices)
+
+        tr.run(0, dftiters)
 
     else:
       raise ValueError(
