@@ -18,12 +18,14 @@ from src.e2eflow.synthia.data import SynthiaData
 from src.e2eflow.cityscapes.data import CityscapesData
 from src.e2eflow.driving.data import DrivingData
 from src.e2eflow.driving.input import DrivingInput
+from src.e2eflow.monkaa.data import MonkaaData
+from src.e2eflow.monkaa.input import MonkaaInput
 
 tf.app.flags.DEFINE_string('ex', 'default',
                            'Name of the experiment.'
                            'If the experiment folder already exists in the log dir, '
                            'training will be continued from the latest checkpoint.')
-tf.app.flags.DEFINE_boolean('debug', True,
+tf.app.flags.DEFINE_boolean('debug', False,
                             'Enable image summaries and disable checkpoint writing for debugging.')
 tf.app.flags.DEFINE_boolean('ow', False,
                             'Overwrites a previous experiment with the same name (if present)'
@@ -307,6 +309,61 @@ def main(argv=None):
             devices=devices)
 
         tr.run(0, stiters)
+
+    ### Add
+    elif train_dataset == 'monkaa':
+
+        mconfig = copy.deepcopy(experiment.config['train'])
+
+        mconfig.update(experiment.config['train_driving'])
+
+        convert_input_strings(mconfig, dirs)
+
+        miters = mconfig.get('num_iters', 0)
+
+        mdata = MonkaaData(data_dir=dirs['data'],
+
+                            fast_dir=dirs.get('fast'),
+
+                            stat_log_dir=None,
+
+                            development=run_config['development'])
+
+        minput = MonkaaInput(data=mdata,
+
+                              batch_size=gpu_batch_size,
+
+                              normalize=False,
+
+                              dims=(mconfig['height'], mconfig['width']))
+
+        tr = Trainer(
+
+            lambda shift: minput.input_raw(swap_images=False,
+
+                                           shift=shift * run_config['batch_size']),
+
+            lambda: einput.input_train_2012(),
+
+            params=mconfig,
+
+            normalization=minput.get_normalization(),
+
+            train_summaries_dir=experiment.train_dir,
+
+            eval_summaries_dir=experiment.eval_dir,
+
+            experiment=FLAGS.ex,
+
+            ckpt_dir=experiment.save_dir,
+
+            debug=FLAGS.debug,
+
+            interactive_plot=run_config.get('interactive_plot'),
+
+            devices=devices)
+
+        tr.run(0, miters)
 
     ### Add
 
