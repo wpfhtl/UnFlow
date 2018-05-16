@@ -1,16 +1,17 @@
-nvcc -std=c++11 -c -o backward_warp_op.cu.o backward_warp_op.cu.cc -I /usr/local/lib/python3.5/dist-packages/tensorflow/include -I /usr/local/cuda-8.0/include -D GOOGLE_CUDA=1 -x cu -Xcompiler -fPIC
+nvcc -std=c++11 -c -o backward_warp_op.cu.o backward_warp_op.cu.cc -I ~/.local/lib/python3.5/site-packages/tensorflow/include -I /usr/local/cuda-9.0/include -x cu -Xcompiler -fPIC
 
-nvcc -std=c++11 -c -o correlation_op.cu.o correlation_op.cu.cc -I /usr/local/lib/python3.5/dist-packages/tensorflow/include -I /usr/local/cuda-8.0/include -D GOOGLE_CUDA=1 -x cu -Xcompiler -fPIC
+nvcc -std=c++11 -c -o correlation_op.cu.o correlation_op.cu.cc -I ~/.local/lib/python3.5/site-packages/tensorflow/include -I /usr/local/cuda-8.0/include -x cu -Xcompiler -fPIC
 
-nvcc -std=c++11 -c -o downsample_op.cu.o downsample_op.cu.cc -I /usr/local/lib/python3.5/dist-packages/tensorflow/include -I /usr/local/cuda-8.0/include -D GOOGLE_CUDA=1 -x cu -Xcompiler -fPIC
+nvcc -std=c++11 -c -o downsample_op.cu.o downsample_op.cu.cc -I ~/.local/lib/python3.5/site-packages/tensorflow/include -I /usr/local/cuda-8.0/include -x cu -Xcompiler -fPIC
 
-nvcc -std=c++11 -c -o forward_warp_op.cu.o forward_warp_op.cu.cc -I /usr/local/lib/python3.5/dist-packages/tensorflow/include -I /usr/local/cuda-8.0/include -D GOOGLE_CUDA=1 -x cu -Xcompiler -fPIC
+nvcc -std=c++11 -c -o forward_warp_op.cu.o forward_warp_op.cu.cc -I ~/.local/lib/python3.5/site-packages/tensorflow/include -I /usr/local/cuda-8.0/include -x cu -Xcompiler -fPIC
 
 
-g++-4.9 -std=c++11 -shared -o backward_warp_op.so backward_warp_op.cu.o backward_warp_op.cc -I /usr/local/lib/python3.5/dist-packages/tensorflow/include -fPIC -lcudart -D GOOGLE_CUDA=1 -L /usr/local/cuda/lib64
+g++ -std=c++11 -shared -o backward_warp_op.so backward_warp_op.cu.o backward_warp_op.cc -I ~/.local/lib/python3.5/site-packages/tensorflow/include -fPIC -lcudart -L /usr/local/cuda/lib64
 
-g++-4.9 -std=c++11 -shared -o correlation_op.so correlation_op.cu.o correlation_op.cc -I /usr/local/lib/python3.5/dist-packages/tensorflow/include -fPIC -lcudart -D GOOGLE_CUDA=1 -L /usr/local/cuda/lib64
+g++ -std=c++11 -shared -o correlation_op.so correlation_op.cu.o correlation_op.cc -I ~/.local/lib/python3.5/site-packages/tensorflow/include -fPIC -lcudart -L /usr/local/cuda/lib64
 
-g++-4.9 -std=c++11 -shared -o downsample_op.so downsample_op.cu.o downsample_op.cc -I /usr/local/lib/python3.5/dist-packages/tensorflow/include -fPIC -lcudart -D GOOGLE_CUDA=1 -L /usr/local/cuda/lib64
+g++ -std=c++11 -shared -o downsample_op.so downsample_op.cu.o downsample_op.cc -I ~/.local/lib/python3.5/site-packages/tensorflow/include -fPIC -lcudart -L /usr/local/cuda/lib64
 
-g++-4.9 -std=c++11 -shared -o forward_warp_op.so forward_warp_op.cu.o forward_warp_op.cc -I /usr/local/lib/python3.5/dist-packages/tensorflow/include -fPIC -lcudart -D GOOGLE_CUDA=1 -L /usr/local/cuda/lib64
+g++ -std=c++11 -shared -o forward_warp_op.so forward_warp_op.cu.o forward_warp_op.cc -I ~/.local/lib/python3.5/site-packages/tensorflow/include -fPIC -lcudart -L /usr/local/cuda/lib64
+
