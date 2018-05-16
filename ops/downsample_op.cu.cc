@@ -8,6 +8,8 @@
 #include "tensorflow/core/util/cuda_kernel_helper.h"
 
 using namespace tensorflow;
+using CPUDevice = Eigen::ThreadPoolDevice;
+using GPUDevice = Eigen::GpuDevice;
 
 typedef Eigen::GpuDevice GPUDevice;
 
